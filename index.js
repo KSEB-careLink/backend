@@ -1,16 +1,15 @@
 require('dotenv').config();
+
 const express = require('express');
 const app = express();
-const port = process.env.PORT || 3000;
+const cors = require('cors');
 
-app.use(express.json()); // 먼저 와야 함
+app.use(cors());
+app.use(express.json());
 
-const userRoutes = require('./routes/user');
-app.use('/users', userRoutes);
+app.use('/signup-guardian', require('./routes/signupGuardian'));
+app.use('/link-patient', require('./routes/linkPatient'));
+app.use('/get-patients', require('./routes/getPatients'));
+app.use('/get-guardian', require('./routes/getGuardian'));
 
-const patientRoutes = require('./routes/patient');
-app.use('/patients', patientRoutes);
-
-app.listen(port, () => {
-  console.log(`✅ Server running at http://localhost:${port}`);
-});
+app.listen(3000, () => console.log('Server running on port 3000'));
