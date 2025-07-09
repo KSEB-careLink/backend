@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { db, auth } = require('../firebase');
+const { db, admin } = require('../firebase');
+const authWithRole = require('../middlewares/authWithRole');
 
-router.post('/', async (req, res) => {
-  const { patientUid, joinCode, name } = req.body;
+router.post('/', authWithRole(['patient']), async (req, res) => {
+  const { joinCode, name } = req.body;
+  const patientUid = req.user.uid;
 
   try {
     const codeDoc = await db.collection('joinCodes').doc(joinCode).get();

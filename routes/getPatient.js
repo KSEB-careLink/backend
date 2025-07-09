@@ -1,10 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const { db } = require('../firebase');
+const authWithRole = require('../middlewares/authWithRole');
 
 router.get('/:guardianId', async (req, res) => {
   const { guardianId } = req.params;
+   const callerUid = req.user.uid;
 
+  if (callerUid !== guardianId) {
+    return res.status(403).json({ error: '본인의 데이터만 조회할 수 있습니다.' });
+  }
+  
   try {
     const doc = await db.collection('users').doc(guardianId).get();
     const linkedPatients = doc.data().linkedPatients || [];

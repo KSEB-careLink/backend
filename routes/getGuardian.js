@@ -1,9 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const { db } = require('../firebase');
+const authWithRole = require('../middlewares/authWithRole');
 
-router.get('/:patientId', async (req, res) => {
+router.get('/:patientId', authWithRole(['patient']), async (req, res) => {
   const { patientId } = req.params;
+  const callerUid = req.user.uid;
+
+  if (callerUid !== patientId) {
+    return res.status(403).json({ error: '본인만 조회할 수 있습니다.' });
+  }
 
   try {
     const patientDoc = await db.collection('users').doc(patientId).get();
