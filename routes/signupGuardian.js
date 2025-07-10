@@ -9,7 +9,7 @@ router.post('/', async (req, res) => {
   try {
     const user = await auth.createUser({ email, password, displayName: name });
 
-    const joinCode = uuidv4().slice(0, 6); // 예: 'a1b2c3'
+    const joinCode = uuidv4().slice(0, 6);
 
     await db.collection('users').doc(user.uid).set({
       role: 'guardian',
@@ -25,8 +25,10 @@ router.post('/', async (req, res) => {
 
     res.status(200).json({ uid: user.uid, joinCode });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    if (err.code === 'auth/email-already-exists') {
+      return res.status(400).json({ error: '이미 존재하는 이메일입니다.' });
+    }
+    res.status(500).json({ error: '회원가입 중 문제가 발생했습니다.' });
   }
 });
-
-module.exports = router;

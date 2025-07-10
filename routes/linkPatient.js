@@ -15,14 +15,17 @@ router.post('/', authWithRole(['patient']), async (req, res) => {
 
     const guardianId = codeDoc.data().guardianId;
 
-    // 환자 등록
+    const existingPatient = await db.collection('users').doc(patientUid).get();
+    if (existingPatient.exists) {
+      return res.status(400).json({ error: '이미 연동된 환자입니다.' });
+    }
+
     await db.collection('users').doc(patientUid).set({
       role: 'patient',
       name,
       linkedGuardian: guardianId
     });
 
-    // 보호자에 환자 추가
     await db.collection('users').doc(guardianId).update({
       linkedPatients: admin.firestore.FieldValue.arrayUnion(patientUid)
     });
@@ -32,5 +35,3 @@ router.post('/', authWithRole(['patient']), async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-module.exports = router;
