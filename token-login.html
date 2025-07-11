@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Firebase 로그인 & 토큰 발급</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <h2>Firebase 로그인</h2>
+  <input id="email" placeholder="이메일"><br/>
+  <input id="password" type="password" placeholder="비밀번호"><br/>
+  <button onclick="login()">로그인</button>
+
+  <pre id="output"></pre>
+
+  <script>
+    const firebaseConfig = {
+    apiKey: "AIzaSyDt2utnf0uQWTwK3wUSfn_9HIyB27cCkMw",
+    authDomain: "carelink-a228a.firebaseapp.com",
+    projectId: "carelink-a228a",
+    storageBucket: "carelink-a228a.firebasestorage.app",
+    messagingSenderId: "1043106500906",
+    appId: "1:1043106500906:web:eac9d8281d6422df398e53",
+    measurementId: "G-JQSH49JLTJ"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    function login() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const output = document.getElementById("output");
+
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(userCredential => userCredential.user.getIdToken())
+        .then(token => {
+          output.textContent = `✅ 아래 토큰을 Postman Authorization 헤더에 사용하세요:\n\nBearer ${token}`;
+        })
+        .catch(err => {
+          output.textContent = `❌ 로그인 실패: ${err.message}`;
+        });
+    }
+  </script>
+</body>
+</html>
