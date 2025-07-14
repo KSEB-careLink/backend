@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('./scheduler/alarmScheduler');
 
 const express = require('express');
 const cors = require('cors');
@@ -11,11 +12,18 @@ app.use(express.json());
 const authRoutes = require('./routes/auth');
 const linkRoutes = require('./routes/link');
 const userRoutes = require('./routes/users');
+const registerRouter = require('./routes/register');
+const memoryRouter = require('./routes/memory');
+const alarmsRouter = require('./routes/alarms');
 
 app.use('/auth', authRoutes);
 app.use('/link', linkRoutes);
 app.use('/users', userRoutes);
+app.use('/register', registerRouter);
+app.use('/memory', memoryRouter);
+app.use('/alarms', alarmsRouter);
 
 app.listen(process.env.PORT || 3000, () => {
   console.log('🚀 CareLink API running on port 3000');
 });
+

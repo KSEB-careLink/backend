@@ -4,10 +4,12 @@ const serviceAccount = require('./serviceAccountKey.json');
 
 if (!admin.apps.length) {
   admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
+    credential: admin.credential.cert(serviceAccount),
+    storageBucket: "carelink-a228a.firebasestorage.app"
   });
 }
 
 const db = admin.firestore();
+const bucket = admin.storage().bucket()
 
-module.exports = { admin, db };
+module.exports = { admin, db, bucket };
