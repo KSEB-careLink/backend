@@ -17,6 +17,8 @@ const memoryRouter = require('./routes/memory');
 const alarmsRouter = require('./routes/alarms');
 const voicememoryrouter = require('./routes/voicememory');
 const voiceRouter = require('./routes/voice');
+const geofenceFcmRouter = require('./routes/geofencefcm');
+const geofenceAlertRouter = require('./routes/geofencealert');
 
 app.use('/auth', authRoutes);
 app.use('/link', linkRoutes);
@@ -26,6 +28,8 @@ app.use('/memory', memoryRouter);
 app.use('/alarms', alarmsRouter);
 app.use('/voicememory', voicememoryrouter);
 app.use('/voice', voiceRouter);
+app.use('/geofencefcm', geofenceFcmRouter);
+app.use('/geofencealert', geofenceAlertRouter);
 
 app.listen(process.env.PORT || 3000, () => {
   console.log('🚀 CareLink API running on port 3000');

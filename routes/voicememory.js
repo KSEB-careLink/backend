@@ -1,4 +1,4 @@
-//routes/voicememory.js
+// routes/voicememory.js
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
@@ -9,34 +9,32 @@ const axios = require('axios');
 const authWithRole = require('../middlewares/authWithRole');
 const { db } = require('../firebase');
 
-//Multer 설정 (uploads/에 임시 저장)
+// Multer 설정 (uploads/에 임시 저장)
 const upload = multer({ dest: 'uploads/' });
 
 router.post(
-  '/', 
-  authWithRole(['guardian']), 
+  '/',
+  authWithRole(['guardian']),
   upload.single('file'),   // form-data field name: 'file'
   async (req, res) => {
-    console.log("요청 수신됨");
-    console.log("req.body:", req.body);
-    console.log("req.file:", req.file);
-    console.log("req.user:", req.user);
-
     const { uid } = req.user;
-    const { patientId, patientName, photoDescription, relationship, tone } = req.body;
+    const { patientId, patientName, photoDescription, relationship } = req.body;
     const file = req.file;
+    if (!patientId || !file) {
+      return res.status(400).json({ error: 'patientId와 file 모두 필요합니다.' });
+    }
 
     try {
-      //Firestore에서 환자 문서 확인
-      const patientDoc = await db.collection('users').doc(patientId).get();
-      if (!patientDoc.exists) {
-        return res.status(404).json({ error: '환자 정보가 없습니다.' });
+      // patients 컬렉션에서 tone 조회 & 권한 확인
+      const patientDoc = await db.collection('patients').doc(patientId).get();
+      if (!patientDoc.exists || patientDoc.data().guardian_uid !== uid) {
+        return res
+          .status(patientDoc.exists ? 403 : 404)
+          .json({ error: '이 환자를 관리할 권한이 없습니다.' });
       }
-      if (patientDoc.data().linkedGuardian !== uid) {
-        return res.status(403).json({ error: '이 환자를 관리할 권한이 없습니다.' });
-      }
+      const tone = patientDoc.data().tone;
 
-      //Python 서버에 보낼 FormData 구성
+      // Python 서버에 보낼 FormData 구성 (req.body.tone 제거)
       const formData = new FormData();
       formData.append('guardian_uid', uid);
       formData.append('name', req.user.name || 'GuardianName');
@@ -44,24 +42,32 @@ router.post(
       formData.append('patient_name', patientName);
       formData.append('photo_description', photoDescription);
       formData.append('relationship', relationship || '보호자');
-      formData.append('tone', tone || 'neutral');
+      formData.append('tone', tone);
 
-      console.log("Python 서버 전송 준비 완료!");
-
-      //FastAPI 호출
-      const pythonUrl = 'fastapi 주소';
+      // FastAPI 호출 & 응답 처리
+      const pythonUrl = 'http://localhost:8000/generate-and-read';
       const response = await axios.post(pythonUrl, formData, {
         headers: formData.getHeaders(),
         maxContentLength: Infinity,
         maxBodyLength: Infinity,
       });
 
-      console.log("Python 응답 수신 완료!", response.data);
-
-      //임시 파일 삭제
+      await db
+     .collection('patients').doc(patientId)
+     .collection('memory_logs').add({
+     photo_description,
+     reminder_text: response.data.reminder_text,
+     tts_url:    response.data.tts_url,
+     generated_quiz: response.data.generated_quiz,
+     topic:      response.data.topic,
+     tone:       patientDoc.data().tone,
+     created_at: admin.firestore.FieldValue.serverTimestamp()
+  });
+  
+      // 임시 파일 삭제
       fs.unlinkSync(file.path);
 
-      //클라이언트에 결과 반환
+      // 클라이언트에 결과 반환
       return res.status(200).json({
         message: '회상문장 생성 성공',
         data: response.data,
@@ -70,7 +76,9 @@ router.post(
     } catch (err) {
       console.error('[Memory Generation Error]', err);
       if (file && file.path) fs.unlinkSync(file.path);
-      return res.status(500).json({ error: '회상 생성 중 오류 발생', detail: err.message });
+      return res
+        .status(500)
+        .json({ error: '회상 생성 중 오류 발생', detail: err.message });
     }
   }
 );
