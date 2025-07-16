@@ -1,4 +1,14 @@
 // routes/voicememory.js
+/* [보호자 앱]
+└─ POST /memory (사진+텍스트+관계+환자 정보 포함)
+   └─ 인증된 보호자가 요청
+      └─ 환자 문서 확인 + tone 가져옴
+         └─ FastAPI로 FormData 전송
+            └─ 회상 문장 + 퀴즈 + tts_url 응답
+               └─ Firestore memory_logs 저장
+                  └─ 응답 반환 + 임시 파일 삭제
+*/
+
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
@@ -12,10 +22,10 @@ const { db } = require('../firebase');
 // Multer 설정 (uploads/에 임시 저장)
 const upload = multer({ dest: 'uploads/' });
 
-router.post(
+router.post( // 인증된 보호자만 호출 가능, fromdata 내 file 필드 수신
   '/',
   authWithRole(['guardian']),
-  upload.single('file'),   // form-data field name: 'file'
+  upload.single('file'),   
   async (req, res) => {
     const { uid } = req.user;
     const { patientId, patientName, photoDescription, relationship } = req.body;
@@ -25,7 +35,8 @@ router.post(
     }
 
     try {
-      // patients 컬렉션에서 tone 조회 & 권한 확인
+      // Firestore patients/{patientId} 조회, 보호자가 맞는 지 확인
+      // tone은 회상 문장 스타일 조정용
       const patientDoc = await db.collection('patients').doc(patientId).get();
       if (!patientDoc.exists || patientDoc.data().guardian_uid !== uid) {
         return res
@@ -34,7 +45,7 @@ router.post(
       }
       const tone = patientDoc.data().tone;
 
-      // Python 서버에 보낼 FormData 구성 (req.body.tone 제거)
+      // Python 서버에 보낼 FormData 구성
       const formData = new FormData();
       formData.append('guardian_uid', uid);
       formData.append('name', req.user.name || 'GuardianName');
@@ -52,6 +63,7 @@ router.post(
         maxBodyLength: Infinity,
       });
 
+      // 회상 로그 firestore 저장
       await db
      .collection('patients').doc(patientId)
      .collection('memory_logs').add({
@@ -62,7 +74,7 @@ router.post(
      topic:      response.data.topic,
      tone:       patientDoc.data().tone,
      created_at: admin.firestore.FieldValue.serverTimestamp()
-  });
+  }); // 응답 받은 내용 그대로 memory_logs 하위 컬렉션에 저장
   
       // 임시 파일 삭제
       fs.unlinkSync(file.path);
