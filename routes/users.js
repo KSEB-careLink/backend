@@ -9,10 +9,10 @@ router.get('/get-guardian/:patientId', authWithRole(['patient']), async (req, re
   const { patientId } = req.params;
   if (req.user.uid !== patientId) return res.status(403).json({ error: '본인만 조회 가능' });
   try {
-    const patientDoc = await db.collection('users').doc(patientId).get();
+    const patientDoc = await db.collection('patients').doc(patientId).get();
     const guardianId = patientDoc.data().linkedGuardian;
     if (!guardianId) return res.status(404).json({ error: '보호자 없음' });
-    const guardianDoc = await db.collection('users').doc(guardianId).get();
+    const guardianDoc = await db.collection('guardians').doc(guardianId).get();
     res.status(200).json({ guardianId, guardianName: guardianDoc.data().name });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -24,10 +24,10 @@ router.get('/get-patients/:guardianId', authWithRole(['guardian']), async (req, 
   const { guardianId } = req.params;
   if (req.user.uid !== guardianId) return res.status(403).json({ error: '본인만 조회 가능' });
   try {
-    const doc = await db.collection('users').doc(guardianId).get();
+    const doc = await db.collection('guardians').doc(guardianId).get();
     const linkedPatients = doc.data().linkedPatients || [];
     const patientDocs = await Promise.all(
-      linkedPatients.map(id => db.collection('users').doc(id).get())
+      linkedPatients.map(id => db.collection('patients').doc(id).get())
     );
     const patients = patientDocs
       .filter(doc => doc.exists)
@@ -37,6 +37,5 @@ router.get('/get-patients/:guardianId', authWithRole(['guardian']), async (req, 
     res.status(500).json({ error: err.message });
   }
 });
-
 
 module.exports = router;

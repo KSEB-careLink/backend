@@ -1,4 +1,8 @@
 // routes/voice.js
+/* 전체 흐름 요약 
+ [보호자 앱] → /voice/register → [Node.js] → 
+ [FastAPI] → voiceUrl 반환 → Firestore 저장 */
+ 
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
@@ -50,7 +54,7 @@ router.post(
 
       // Firestore에 voiceUrls 배열로 저장 (최대 3개까지)
       await db
-        .collection('users')
+        .collection('guardians') //user에서 변경
         .doc(uid)
         .update({
           voiceUrls: admin.firestore.FieldValue.arrayUnion(voiceUrl)

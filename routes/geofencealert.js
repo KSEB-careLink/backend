@@ -15,7 +15,7 @@ router.post('/', authWithRole(['patient']), async (req, res) => {
     const guardian_uid = patientData.guardian_uid;
     const patient_name = patientData.name || "환자";
 
-    const guardianSnap = await db.collection('users').doc(guardian_uid).get();
+    const guardianSnap = await db.collection('guardians').doc(guardian_uid).get();
     if (!guardianSnap.exists) return res.status(404).send("보호자 정보 없음");
 
     const fcm_tokens = guardianSnap.data()?.fcm_tokens || [];

@@ -11,7 +11,7 @@ router.post('/register', authWithRole(['guardian']), async (req, res) => {
   if (!fcm_token) return res.status(400).send("Missing fcm_token");
 
   try {
-    await db.collection('users').doc(guardian_uid).set({
+    await db.collection('guardians').doc(guardian_uid).set({
       fcm_tokens: admin.firestore.FieldValue.arrayUnion(fcm_token)
     }, { merge: true });
 
@@ -30,7 +30,7 @@ router.post('/unregister', authWithRole(['guardian']), async (req, res) => {
   if (!fcm_token) return res.status(400).send("Missing fcm_token");
 
   try {
-    await db.collection('users').doc(guardian_uid).update({
+    await db.collection('guardians').doc(guardian_uid).update({
       fcm_tokens: admin.firestore.FieldValue.arrayRemove(fcm_token)
     });
     res.send({ success: true });
