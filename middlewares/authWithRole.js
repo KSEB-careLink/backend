@@ -15,13 +15,21 @@ const authWithRole = (allowedRoles = []) => async (req, res, next) => {
     const uid = decoded.uid;
 
     // 사용자 문서 조회
-    const userSnap = await db.collection('users').doc(uid).get();
-    if (!userSnap.exists) {
+    const guardianSnap = await db.collection('guardians').doc(uid).get();
+    const patientSnap = await db.collection('patients').doc(uid).get();
+
+    let userData;
+    let userRole;
+
+    if (guardianSnap.exists) {
+      userData = guardianSnap.data();
+      userRole = 'guardian';
+    } else if (patientSnap.exists) {
+      userData = patientSnap.data();
+      userRole = 'patient';
+    } else {
       return res.status(404).json({ error: '사용자 정보를 찾을 수 없습니다.' });
     }
-
-    const userData = userSnap.data();
-    const userRole = userData.role;
 
     // 권한 확인
     if (!allowedRoles.includes(userRole)) {
@@ -32,7 +40,7 @@ const authWithRole = (allowedRoles = []) => async (req, res, next) => {
     req.user = {
       uid,
       role: userRole,
-      name: userData.name || null, // 필요한 것만 선택적으로 추가
+      name: userData.name || null,
     };
 
     return next();
