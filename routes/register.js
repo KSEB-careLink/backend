@@ -39,7 +39,9 @@ router.post('/register', authenticate, async (req, res) => {
       birthDate,
       relationship,
       tone,
-      guardian_uid: guardianUid,
+      linkedGuardian: admin.firestore.FieldValue.arrayUnion(
+        guardianUid
+      ),
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
