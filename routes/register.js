@@ -39,7 +39,7 @@ router.post('/register', authenticate, async (req, res) => {
       birthDate,
       relationship,
       tone,
-      createdBy: guardianUid,
+      guardian_uid: guardianUid,
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
