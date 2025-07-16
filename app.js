@@ -7,6 +7,8 @@ const cors = require('cors');
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 // 라우터 import
 const authRoutes = require('./routes/auth');
@@ -17,6 +19,7 @@ const memoryRouter = require('./routes/memory');
 const alarmsRouter = require('./routes/alarms');
 const geofenceFcmRouter = require('./routes/geofencefcm');
 const geofenceAlertRouter = require('./routes/geofencealert');
+const registerVoiceRouter = require('./routes/registerVoice');
 const reminderRouter = require('./routes/reminder'); // ✅ 추가
 
 // 라우터 연결
@@ -28,6 +31,7 @@ app.use('/memory', memoryRouter);
 app.use('/alarms', alarmsRouter);
 app.use('/geofencefcm', geofenceFcmRouter);
 app.use('/geofencealert', geofenceAlertRouter);
+app.use('/registerVoice', registerVoiceRouter);
 app.use('/reminder', reminderRouter); // ✅ 추가
 
 // 서버 실행
