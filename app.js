@@ -19,7 +19,7 @@ const memoryRouter = require('./routes/memory');
 const alarmsRouter = require('./routes/alarms');
 const geofenceFcmRouter = require('./routes/geofencefcm');
 const geofenceAlertRouter = require('./routes/geofencealert');
-const registerVoiceRouter = require('./routes/registervoice');
+const registerVoiceRouter = require('./routes/registerVoice');
 const reminderRouter = require('./routes/reminder');
 const memoryLogsRouter = require('./routes/memorylogs');
 
@@ -32,7 +32,7 @@ app.use('/memory', memoryRouter);
 app.use('/alarms', alarmsRouter);
 app.use('/geofencefcm', geofenceFcmRouter);
 app.use('/geofencealert', geofenceAlertRouter);
-app.use('/registervoice', registerVoiceRouter);
+app.use('/registerVoice', registerVoiceRouter);
 app.use('/reminder', reminderRouter); 
 app.use('/memory-logs', memoryLogsRouter);
 
