@@ -19,8 +19,9 @@ const memoryRouter = require('./routes/memory');
 const alarmsRouter = require('./routes/alarms');
 const geofenceFcmRouter = require('./routes/geofencefcm');
 const geofenceAlertRouter = require('./routes/geofencealert');
-const registerVoiceRouter = require('./routes/registerVoice');
-const reminderRouter = require('./routes/reminder'); // ✅ 추가
+const registerVoiceRouter = require('./routes/registervoice');
+const reminderRouter = require('./routes/reminder');
+const memoryLogsRouter = require('./routes/memorylogs');
 
 // 라우터 연결
 app.use('/auth', authRoutes);
@@ -31,8 +32,9 @@ app.use('/memory', memoryRouter);
 app.use('/alarms', alarmsRouter);
 app.use('/geofencefcm', geofenceFcmRouter);
 app.use('/geofencealert', geofenceAlertRouter);
-app.use('/registerVoice', registerVoiceRouter);
-app.use('/reminder', reminderRouter); // ✅ 추가
+app.use('/registervoice', registerVoiceRouter);
+app.use('/reminder', reminderRouter); 
+app.use('/memory-logs', memoryLogsRouter);
 
 // 서버 실행
 app.listen(process.env.PORT || 3000, () => {

@@ -9,7 +9,7 @@ router.post('/', authWithRole(['patient']), async (req, res) => {
 
   try {
     // 보호자 문서 조회
-    const guardianDoc = await db.collection('users').doc(guardianId).get();
+    const guardianDoc = await db.collection('guardians').doc(guardianId).get();
     if (!guardianDoc.exists) {
       return res.status(404).json({ error: '보호자 정보를 찾을 수 없습니다.' });
     }
