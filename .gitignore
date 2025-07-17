@@ -3,3 +3,5 @@ serviceAccountKey.json
 firebase-adminsdk.json
 .env
 uploads/
+package.json
+*.json
